@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 export const GITHUB_URL = 'https://github.com/yozi39';
 
 export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -34,7 +36,7 @@ export async function copySiteLink() {
   const url = 'https://yozi.win/';
   try {
     await navigator.clipboard.writeText(url);
-    toast('Copied https://yozi.win/');
+    toast(t('Copied https://yozi.win/', '已复制 https://yozi.win/'));
   } catch {
     // Fallback for browsers/contexts without the async clipboard API.
     const field = Object.assign(document.createElement('textarea'), { value: url, readOnly: true });
@@ -43,7 +45,7 @@ export async function copySiteLink() {
     field.select();
     const ok = document.execCommand?.('copy');
     field.remove();
-    toast(ok ? 'Copied https://yozi.win/' : `Link: ${url}`);
+    toast(ok ? t('Copied https://yozi.win/', '已复制 https://yozi.win/') : `${t('Link', '链接')}: ${url}`);
   }
 }
 

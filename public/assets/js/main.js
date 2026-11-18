@@ -2,17 +2,30 @@
 import { initTerminal } from './terminal.js';
 import { initPalette } from './palette.js';
 import { reducedMotion, copySiteLink } from './util.js';
+import { initI18n, t } from './i18n.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-/* Platform-aware shortcut hint (⌘ on Apple devices) */
-if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) $$('[data-mod]').forEach((n) => { n.textContent = '⌘'; });
+/* Language first, so everything below starts with the right text */
+initI18n();
+
+/* Platform-aware shortcut hint (⌘ on Apple devices); re-run after a language switch rewrites the footer */
+const isApple = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+const fixModKeys = () => { if (isApple) $$('[data-mod]').forEach((n) => { n.textContent = '⌘'; }); };
+fixModKeys();
 
 /* Theme toggle button */
 const themeBtn = $('#theme-toggle');
 themeBtn?.addEventListener('click', () => window.yoziTheme?.toggle());
-if (themeBtn && window.yoziTheme) themeBtn.setAttribute('aria-label', window.yoziTheme.resolved() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+function labelThemeBtn() {
+  if (!themeBtn || !window.yoziTheme) return;
+  const label = window.yoziTheme.resolved() === 'dark' ? t('Switch to light theme', '切换到浅色模式') : t('Switch to dark theme', '切换到深色模式');
+  themeBtn.setAttribute('aria-label', label);
+  themeBtn.title = label;
+}
+labelThemeBtn();
+document.addEventListener('themechange', labelThemeBtn);
 
 /* Header: solid background after scrolling */
 const header = $('#site-header');
@@ -27,9 +40,16 @@ function setMenu(open) {
   if (!menuBtn || !menu) return;
   menu.hidden = !open;
   menuBtn.setAttribute('aria-expanded', String(open));
-  menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  menuBtn.setAttribute('aria-label', open ? t('Close menu', '关闭菜单') : t('Open menu', '打开菜单'));
   header?.classList.toggle('menu-open', open);
 }
+if (menuBtn) menuBtn.setAttribute('aria-label', t('Open menu', '打开菜单'));
+document.addEventListener('langchange', () => {
+  fixModKeys();
+  labelThemeBtn();
+  if (menu) setMenu(!menu.hidden);
+  requestAnimationFrame(() => moveIndicator()); // nav labels change width
+});
 menuBtn?.addEventListener('click', () => setMenu(menu.hidden));
 menu?.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu && !menu.hidden) { setMenu(false); menuBtn.focus(); } });

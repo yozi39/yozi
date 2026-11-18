@@ -23,11 +23,11 @@ USER = "yozi39"
 INDEX = pathlib.Path(__file__).resolve().parent.parent / "public" / "index.html"
 WEEKS = 53
 
-# Repositories shown on the home page: (repo name, display title, subtitle).
+# Repositories shown on the home page: (repo name, title, subtitle, Chinese subtitle).
 # Only these are listed; stars are refreshed from GitHub on every run.
 CURATED = [
-    ("vscode-coding-time-tracker", "Coding Time Tracker", "VS Code extension · TypeScript"),
-    ("unity-minesweeper", "Unity Minesweeper", "2D game · Unity / C#"),
+    ("vscode-coding-time-tracker", "Coding Time Tracker", "VS Code extension · TypeScript", "VS Code 扩展 · TypeScript"),
+    ("unity-minesweeper", "Unity Minesweeper", "2D game · Unity / C#", "2D 小游戏 · Unity / C#"),
 ]
 
 
@@ -72,14 +72,14 @@ def render_graph(days):
 
 def render_repos(repos):
     out = []
-    for name, title, sub in CURATED:
+    for name, title, sub, sub_zh in CURATED:
         r = repos.get(name)
         if not r:
             continue
         out.append(
             f'<li><a href="{html.escape(r["html_url"], quote=True)}" target="_blank" rel="noopener">'
             f'<svg aria-hidden="true"><use href="#i-github"/></svg>'
-            f'<span><b>{html.escape(title)}</b><small>{html.escape(sub)}</small></span>'
+            f'<span><b>{html.escape(title)}</b><small data-zh="{html.escape(sub_zh, quote=True)}">{html.escape(sub)}</small></span>'
             f'<em aria-label="{r["stargazers_count"]} stars"><svg aria-hidden="true"><use href="#i-star"/></svg>{r["stargazers_count"]}</em></a></li>'
         )
     return "\n".join(out)
@@ -87,7 +87,7 @@ def render_repos(repos):
 
 def main():
     repos = {}
-    for name, _, _ in CURATED:
+    for name, *_ in CURATED:
         repos[name] = json.loads(get(f"https://api.github.com/repos/{USER}/{name}"))
     total, days = contributions()
 

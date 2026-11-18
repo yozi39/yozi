@@ -1,6 +1,8 @@
 // Browser terminal. Commands are pure text matching: nothing is executed, sent or stored.
+// Commands are always English; their output follows the page language via t('English', '中文').
 // The repo list is read from the "Selected Repos" card so the page stays the single source of truth.
 import { el, scrollToId, GITHUB_URL } from './util.js';
+import { t, lang, setLang } from './i18n.js';
 
 const SECTIONS = { home: 'top', top: 'top', github: 'github', repos: 'repos', cp: 'cp', algorithms: 'cp', links: 'links', contact: 'links' };
 const HISTORY_MAX = 50;
@@ -14,7 +16,8 @@ export function initTerminal({ openPalette } = {}) {
   const quick = document.getElementById('term-quick');
   if (!output || !form || !input) return null;
 
-  const repos = [...document.querySelectorAll('.repo-list a')].map((a) => ({
+  // Read lazily so titles/subtitles reflect the current language.
+  const repos = () => [...document.querySelectorAll('.repo-list a')].map((a) => ({
     name: a.pathname.split('/').filter(Boolean).pop(),
     title: a.querySelector('b')?.textContent.trim() ?? '',
     sub: a.querySelector('small')?.textContent.trim() ?? '',
@@ -35,102 +38,114 @@ export function initTerminal({ openPalette } = {}) {
   const echoCmd = (text) => el('div', 't-line', [el('span', 't-prompt', '$', { 'aria-hidden': 'true' }), ' ', el('span', 't-cmd', text)]);
   const link = (href, text) => el('a', '', text, { href, target: '_blank', rel: 'noopener' });
   const span = (cls, text) => el('span', cls, text);
+  const row = (mark, ...rest) => el('div', '', [span('t-acc', mark), ...rest]);
 
-  // ---- commands --------------------------------------------------------
+  // ---- commands (desc: [English, 中文]) ---------------------------------
   const commands = {
     help: {
-      desc: 'list commands',
+      desc: ['list commands', '列出命令'],
       run: () => out(el('div', 't-grid', Object.entries(commands)
         .filter(([, c]) => !c.hidden)
-        .flatMap(([name, c]) => [el('b', '', name + (c.usage ? ' ' + c.usage : '')), span('', c.desc)]))),
+        .flatMap(([name, c]) => [el('b', '', name + (c.usage ? ' ' + c.usage : '')), span('', t(...c.desc))]))),
     },
-    whoami: { desc: 'who is this', run: () => out('yozi') },
+    whoami: { desc: ['who is this', '我是谁'], run: () => out('yozi') },
     about: {
-      desc: 'short introduction',
-      run: () => out('I’m Yozi, a computer science student learning algorithms, C++ and software engineering.\nI practice algorithm problems and build small tools along the way.\nStill learning. Still building.'),
+      desc: ['short introduction', '简单介绍'],
+      run: () => out(t(
+        'I’m Yozi, a computer science student learning algorithms, C++ and software engineering.\nI practice algorithm problems and build small tools along the way.\nStill learning. Still building.',
+        '我是 Yozi，一名计算机专业的学生，正在学习算法、C++ 和软件工程。\n平时刷算法题，也顺手做些小工具。\n仍在学习，仍在创造。',
+      )),
     },
     ls: {
-      desc: 'list files', usage: '[dir]',
+      desc: ['list files', '列出文件'], usage: '[dir]',
       args: ['repos/'],
       run: (args) => {
         const dir = (args[0] || '').replace(/\/+$/, '').replace(/^~\//, '');
-        if (!dir || dir === '~' || dir === '.') {
-          return out([span('t-dir', 'repos/'), '  about.txt  goals.txt  links.txt']);
-        }
-        if (dir === 'repos') return out(repos.flatMap((r, i) => [i ? '  ' : '', span('t-dir', r.name + '/')]));
-        return out(`ls: cannot access '${args[0]}': No such file or directory`, 't-err');
+        if (!dir || dir === '~' || dir === '.') return out([span('t-dir', 'repos/'), '  about.txt  goals.txt  links.txt']);
+        if (dir === 'repos') return out(repos().flatMap((r, i) => [i ? '  ' : '', span('t-dir', r.name + '/')]));
+        return out(t(`ls: cannot access '${args[0]}': No such file or directory`, `ls: 无法访问 '${args[0]}'：没有那个文件或目录`), 't-err');
       },
     },
     cat: {
-      desc: 'print a file', usage: '<file>',
+      desc: ['print a file', '查看文件'], usage: '<file>',
       args: ['about.txt', 'goals.txt', 'links.txt'],
       run: (args) => {
         const file = (args[0] || '').replace(/^~\//, '');
         if (file === 'about.txt') {
           return el('div', 't-box', [
-            el('div', '', [span('t-acc', '> '), 'Student / Developer / Problem Solver']),
-            el('div', '', [span('t-acc', '> '), 'Interests: ', span('t-hl', 'Algorithms, C++, Systems, Web')]),
-            el('div', '', [span('t-acc', '> '), 'Currently: ', span('t-hl', 'Learning, Building, Practicing'), span('t-dim', ' ...')]),
+            row('> ', t('Student / Developer / Problem Solver', '学生 / 开发者 / 解题者')),
+            row('> ', t('Interests: ', '兴趣：'), span('t-hl', t('Algorithms, C++, Systems, Web', '算法、C++、系统、Web'))),
+            row('> ', t('Currently: ', '现在：'), span('t-hl', t('Learning, Building, Practicing', '学习、构建、刷题')), span('t-dim', ' ...')),
+          ]);
+        }
+        if (file === 'goals.txt') {
+          return el('div', 't-box', [
+            row('[ ] ', t('Master the classic algorithms & data structures', '掌握经典算法与数据结构')),
+            row('[ ] ', t('Solve problems in C++ consistently', '坚持用 C++ 刷题')),
+            row('[ ] ', t('Compete in algorithm contests', '参加算法竞赛')),
           ]);
         }
         if (file === 'links.txt') return out(['GitHub  ', link(GITHUB_URL, 'github.com/yozi39')]);
-        if (file === 'goals.txt') {
-          return el('div', 't-box', [
-            el('div', '', [span('t-acc', '[ ] '), 'Master the classic algorithms & data structures']),
-            el('div', '', [span('t-acc', '[ ] '), 'Solve problems in C++ consistently']),
-            el('div', '', [span('t-acc', '[ ] '), 'Compete in algorithm contests']),
-          ]);
-        }
-        if (!file) return out('cat: missing file operand', 't-err');
-        return out(`cat: ${file}: No such file or directory`, 't-err');
+        if (!file) return out(t('cat: missing file operand', 'cat: 缺少文件参数'), 't-err');
+        return out(t(`cat: ${file}: No such file or directory`, `cat: ${file}：没有那个文件或目录`), 't-err');
       },
     },
     repos: {
-      desc: 'selected repositories',
-      run: () => out(el('div', 't-grid', repos.flatMap((r) => [el('b', '', r.title), el('span', '', [r.sub, '  ', link(r.href, '↗')])]))),
+      desc: ['selected repositories', '精选仓库'],
+      run: () => out(el('div', 't-grid', repos().flatMap((r) => [el('b', '', r.title), el('span', '', [r.sub, '  ', link(r.href, '↗')])]))),
     },
     cd: {
-      desc: 'go to a section', usage: '<section>',
+      desc: ['go to a section', '跳到某个区块'], usage: '<section>',
       args: () => ['github', 'repos', 'cp', 'links', '~'],
       run: (args) => {
         const raw = (args[0] || '~').replace(/\/+$/, '').toLowerCase();
         const target = raw === '~' || raw === '' ? 'top' : SECTIONS[raw];
-        if (!target) return out(`cd: no such section: ${args[0]}`, 't-err');
+        if (!target) return out(t(`cd: no such section: ${args[0]}`, `cd: 没有这个区块：${args[0]}`), 't-err');
         scrollToId(target);
         return null;
       },
     },
-    neofetch: { desc: 'system info', run: () => neofetch() },
+    neofetch: { desc: ['system info', '系统信息'], run: () => neofetch() },
     theme: {
-      desc: 'switch theme', usage: '[light|dark|system]',
+      desc: ['switch theme', '切换主题'], usage: '[light|dark|system]',
       args: ['light', 'dark', 'system'],
       run: (args) => {
-        const t = window.yoziTheme;
-        if (!t) return out('theme: unavailable', 't-err');
+        const th = window.yoziTheme;
+        if (!th) return out(t('theme: unavailable', 'theme：不可用'), 't-err');
         const want = (args[0] || 'toggle').toLowerCase();
-        if (want === 'toggle') t.toggle();
-        else if (['light', 'dark', 'system'].includes(want)) t.set(want);
-        else return out('usage: theme [light|dark|system]', 't-err');
-        return out(`theme → ${t.mode()}${t.mode() === 'system' ? ` (${t.resolved()})` : ''}`);
+        if (want === 'toggle') th.toggle();
+        else if (['light', 'dark', 'system'].includes(want)) th.set(want);
+        else return out(t('usage: theme [light|dark|system]', '用法：theme [light|dark|system]'), 't-err');
+        return out(`theme → ${th.mode()}${th.mode() === 'system' ? ` (${th.resolved()})` : ''}`);
+      },
+    },
+    lang: {
+      desc: ['switch language', '切换语言'], usage: '[en|zh]',
+      args: ['en', 'zh'],
+      run: (args) => {
+        const want = (args[0] || '').toLowerCase();
+        const next = want === 'en' || want === 'zh' ? want : (lang() === 'zh' ? 'en' : 'zh');
+        setLang(next);
+        return out(next === 'zh' ? 'lang → 中文' : 'lang → English');
       },
     },
     github: {
-      desc: 'open GitHub profile',
+      desc: ['open GitHub profile', '打开 GitHub 主页'],
       run: () => {
         window.open(GITHUB_URL, '_blank', 'noopener');
-        return out(['opening ', link(GITHUB_URL, 'github.com/yozi39'), ' …']);
+        return out([t('opening ', '正在打开 '), link(GITHUB_URL, 'github.com/yozi39'), ' …']);
       },
     },
-    history: { desc: 'previous commands', run: () => out(history.map((h, i) => `${String(i + 1).padStart(3)}  ${h}`).join('\n') || '(empty)') },
-    date: { desc: 'current date', run: () => out(new Date().toString()) },
-    echo: { desc: 'print text', usage: '<text>', run: (args, raw) => out(raw.replace(/^echo\s?/i, '')) },
-    pwd: { desc: 'working directory', hidden: true, run: () => out('/home/yozi') },
-    menu: { desc: 'open command menu', run: () => { openPalette?.(); return null; } },
-    clear: { desc: 'clear screen (Ctrl+L)', run: () => { output.replaceChildren(); return null; } },
-    sudo: { hidden: true, run: () => out('yozi is not in the sudoers file. This incident will not be reported.', 't-err') },
-    exit: { hidden: true, run: () => out('There’s no escape from the browser. Try clear.') },
-    rm: { hidden: true, run: () => out('rm: permission denied (read-only filesystem, nice try)', 't-err') },
-    vim: { hidden: true, run: () => out('You’re safe here. No :q! required.') },
+    history: { desc: ['previous commands', '历史命令'], run: () => out(history.map((h, i) => `${String(i + 1).padStart(3)}  ${h}`).join('\n') || t('(empty)', '（空）')) },
+    date: { desc: ['current date', '当前日期'], run: () => out(new Date().toLocaleString(t('en-US', 'zh-CN'))) },
+    echo: { desc: ['print text', '输出文字'], usage: '<text>', run: (args, raw) => out(raw.replace(/^echo\s?/i, '')) },
+    menu: { desc: ['open command menu', '打开命令菜单'], run: () => { openPalette?.(); return null; } },
+    clear: { desc: ['clear screen (Ctrl+L)', '清屏（Ctrl+L）'], run: () => { output.replaceChildren(); return null; } },
+    pwd: { hidden: true, run: () => out('/home/yozi') },
+    sudo: { hidden: true, run: () => out(t('yozi is not in the sudoers file. This incident will not be reported.', 'yozi 不在 sudoers 文件中。此事不会被报告。'), 't-err') },
+    exit: { hidden: true, run: () => out(t('There’s no escape from the browser. Try clear.', '浏览器里可逃不出去。试试 clear。')) },
+    rm: { hidden: true, run: () => out(t('rm: permission denied (read-only filesystem, nice try)', 'rm: 权限不足（只读文件系统，想得美）'), 't-err') },
+    vim: { hidden: true, run: () => out(t('You’re safe here. No :q! required.', '放心，这里不需要 :q!。')) },
   };
   commands.man = { hidden: true, run: () => commands.help.run() };
   commands.ll = { hidden: true, run: (a) => commands.ls.run(a) };
@@ -141,10 +156,11 @@ export function initTerminal({ openPalette } = {}) {
     const art = el('pre', 't-art', ' /\\_/\\\n( o.o )\n > ^ <', { 'aria-hidden': 'true' });
     const info = el('div', 't-grid', [
       el('b', '', 'host'), span('', 'yozi.win'),
-      el('b', '', 'role'), span('', 'CS student'),
-      el('b', '', 'focus'), span('', 'algorithms · C++ · software eng.'),
-      el('b', '', 'shell'), span('', 'yozi-sh (simulated)'),
+      el('b', '', 'role'), span('', t('CS student', '计算机专业学生')),
+      el('b', '', 'focus'), span('', t('algorithms · C++ · software eng.', '算法 · C++ · 软件工程')),
+      el('b', '', 'shell'), span('', t('yozi-sh (simulated)', 'yozi-sh（模拟）')),
       el('b', '', 'theme'), span('', window.yoziTheme?.resolved() ?? 'dark'),
+      el('b', '', 'lang'), span('', lang()),
       el('b', '', 'uptime'), span('', up),
     ]);
     const wrap = el('div', 't-out');
@@ -166,7 +182,7 @@ export function initTerminal({ openPalette } = {}) {
     const cmd = commands[name.toLowerCase()];
     if (name.toLowerCase() !== 'clear') print(echoCmd(raw));
     if (!cmd) {
-      print(out([`command not found: ${name}. Type `, span('t-hl', 'help'), ' for a list.'], 't-err'));
+      print(out([t(`command not found: ${name}. Type `, `未找到命令：${name}。输入 `), span('t-hl', 'help'), t(' for a list.', ' 查看可用命令。')], 't-err'));
       return;
     }
     const result = cmd.run(args, raw);
@@ -183,8 +199,7 @@ export function initTerminal({ openPalette } = {}) {
       pool = Object.keys(commands).filter((k) => !commands[k].hidden);
       prefix = parts[0] ?? '';
     } else {
-      const cmd = commands[parts[0].toLowerCase()];
-      const a = cmd?.args;
+      const a = commands[parts[0].toLowerCase()]?.args;
       pool = typeof a === 'function' ? a() : a || [];
       prefix = parts.at(-1);
     }
@@ -195,7 +210,7 @@ export function initTerminal({ openPalette } = {}) {
     } else if (hits.length > 1) {
       const common = hits.reduce((acc, h) => { let i = 0; while (i < acc.length && acc[i].toLowerCase() === h[i]?.toLowerCase()) i++; return acc.slice(0, i); });
       if (common.length > prefix.length) { parts[parts.length - 1] = common; input.value = parts.join(' '); }
-      else { print(echoCmd(value)); print(out(hits.join('  '), 't-ell')); }
+      else { print(echoCmd(value)); print(out(hits.join('  '), 't-dim')); }
     }
   }
 

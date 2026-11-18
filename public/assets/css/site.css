@@ -12,7 +12,7 @@
 
 :root {
   --sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --mono: "JetBrains Mono", "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  --mono: "JetBrains Mono", "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, "PingFang SC", "Microsoft YaHei", monospace;
   --shell: 1380px;
   --gutter: clamp(16px, 3vw, 36px);
   --header-h: 70px;
@@ -179,6 +179,12 @@ kbd { display: inline-flex; gap: 3px; padding: 1px 6px; border: 1px solid var(--
 .menu-btn { display: none; }
 .menu-btn .ico-close, .menu-btn[aria-expanded="true"] .ico-menu { display: none; }
 .menu-btn[aria-expanded="true"] .ico-close { display: block; }
+/* Language toggle: shows the language you can switch TO */
+.lang-toggle { width: auto; min-width: 42px; padding: 0 10px; font: 700 14px/1 var(--mono); letter-spacing: .02em; }
+.lang-toggle .lang-zh { font-family: var(--sans); font-size: 16px; font-weight: 600; }
+.lang-toggle .lang-en, :root[data-lang="zh"] .lang-toggle .lang-zh { display: none; }
+:root[data-lang="zh"] .lang-toggle .lang-en { display: inline; }
+html.i18n-pending body { visibility: hidden; }
 .theme-toggle .ico-sun, :root[data-theme="light"] .theme-toggle .ico-moon { display: none; }
 :root[data-theme="light"] .theme-toggle .ico-sun { display: block; }
 
@@ -602,3 +608,13 @@ html.js .reveal.in { opacity: 1; transform: none; }
   .contact-actions .btn { flex: 1 1 100%; }
   .foot-sep, .foot-motto { display: none; }
 }
+
+/* 10. Chinese typography ------------------------------------------------------ */
+:root[data-lang="zh"] body { line-height: 1.7; }
+:root[data-lang="zh"] .hero-motto { letter-spacing: .12em; }
+:root[data-lang="zh"] .hero-lede, :root[data-lang="zh"] .card-sub { letter-spacing: .02em; }
+:root[data-lang="zh"] .hero-lede { font-family: var(--sans); }
+:root[data-lang="zh"] .card-head h2, :root[data-lang="zh"] .section-head h2, :root[data-lang="zh"] .journey-intro h2,
+:root[data-lang="zh"] .contact h2, :root[data-lang="zh"] .journey-stats dd { letter-spacing: 0; }
+:root[data-lang="zh"] .band-quote { letter-spacing: .02em; }
+:root[data-lang="zh"] .motto-light { letter-spacing: .04em; }

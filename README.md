@@ -81,6 +81,19 @@ curl -I https://yozi.win/does-not-exist    # 404
 - **响应式**：≥1240 四列；960–1240 两列；≤960 汉堡菜单；≤680 单列。已按 375 / 768 / 1448 宽度检查过。
 - **可访问性**：跳转链接、语义化地标、`aria-live` 终端、可见焦点框，并支持 `prefers-reduced-motion`。
 
+## 中英文切换
+
+页头的 **中 / EN** 按钮可以切换语言，选择会保存在 `localStorage`。首次访问时按浏览器语言自动选择，也可以用链接指定：`https://yozi.win/?lang=zh`、`?lang=en`。终端命令 `lang zh|en` 和命令面板也能切换。
+
+- **页面文字**：英文直接写在 HTML 里，中文写在同一个元素的属性上，两种语言挨在一起，改文案时一起改：
+  - `data-zh="…"` 替换元素文字
+  - `data-zh-html="…"` 替换含标签的内容（如 `<br>`）
+  - `data-zh-aria-label` / `data-zh-title` / `data-zh-placeholder` / `data-zh-content` 替换对应属性
+- **脚本里的文字**（终端输出、命令面板、提示条）：在 `terminal.js` / `palette.js` 里写成 `t('English', '中文')`。
+- **仓库副标题**：在 `scripts/fetch_github.py` 的 `CURATED` 里一起填中文。
+- 实现在 `assets/js/i18n.js`；语言在 `theme.js` 里于首屏绘制前确定，中文访客不会先闪一下英文。
+- 搜索引擎主要收录英文（切换在浏览器里完成，不是独立的中文网址）。
+
 ## 更新内容
 
 - **换展示的仓库**：编辑 `scripts/fetch_github.py` 顶部的 `CURATED`（仓库名、显示标题、副标题），然后运行 `python scripts/fetch_github.py`。
