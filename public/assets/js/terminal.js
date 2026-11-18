@@ -90,6 +90,11 @@ export function initTerminal({ openPalette } = {}) {
         return out(t(`cat: ${file}: No such file or directory`, `cat: ${file}：没有那个文件或目录`), 't-err');
       },
     },
+    tpl: {
+      desc: ['search my C++ templates (learning_log)', '查我的 C++ 模板题（learning_log）'], usage: '[keyword|n|ls]',
+      args: () => ['ls', ...(tplData?.items.map((i) => i.name) ?? [])],
+      run: (args) => tpl(args),
+    },
     repos: {
       desc: ['selected repositories', '精选仓库'],
       run: () => out(el('div', 't-grid', repos().flatMap((r) => [el('b', '', r.title), el('span', '', [r.sub, '  ', link(r.href, '↗')])]))),
@@ -150,6 +155,80 @@ export function initTerminal({ openPalette } = {}) {
   commands.man = { hidden: true, run: () => commands.help.run() };
   commands.ll = { hidden: true, run: (a) => commands.ls.run(a) };
 
+  // ---- tpl: template lookup ------------------------------------------------
+  // Index built at deploy time by scripts/fetch_templates.py (same-origin JSON, loaded on first use).
+  let tplData = null;
+  let lastHits = [];
+  const loadTpl = async () => {
+    if (!tplData) {
+      const res = await fetch('/data/templates.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error(res.status);
+      tplData = await res.json();
+    }
+    return tplData;
+  };
+
+  function tplShow(item) {
+    const copy = el('button', 't-btn', t('copy', '复制'), { type: 'button' });
+    copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(item.code); copy.textContent = t('copied ✓', '已复制 ✓'); }
+      catch { copy.textContent = t('copy failed', '复制失败'); }
+      setTimeout(() => { copy.textContent = t('copy', '复制'); }, 1600);
+    });
+    const lines = item.code.split('\n').length - 1;
+    return el('div', 't-out', [
+      el('div', 't-tpl-head', [
+        el('b', 't-hl', item.name),
+        item.group ? span('t-dim', item.group) : null,
+        span('t-dim', t(`${lines} lines`, `${lines} 行`)),
+        copy,
+        link(item.url, 'GitHub ↗'),
+      ]),
+      el('pre', 't-code', item.code.replace(/\n$/, '')),
+    ]);
+  }
+
+  async function tpl(args) {
+    const data = await loadTpl();
+    const q = args.join(' ').trim();
+    const items = data.items;
+    if (!q) {
+      const groups = new Map();
+      items.forEach((i) => groups.set(i.group || t('general', '通用'), (groups.get(i.group || t('general', '通用')) || 0) + 1));
+      return out([
+        span('t-hl', 'learning_log / 模板题整理'), t(` · ${items.length} templates\n`, ` · 共 ${items.length} 份模板\n`),
+        [...groups].map(([g, n]) => `${g} ${n}`).join(' · '), '\n',
+        span('t-dim', t('usage: tpl <keyword>  e.g. tpl dijkstra · tpl 线段树 · tpl knapsack\n       tpl ls   list all  ·  tpl <n>  open a result',
+          '用法：tpl <关键词>  例如 tpl dijkstra · tpl 线段树 · tpl knapsack\n      tpl ls  列出全部  ·  tpl <序号>  打开搜索结果')),
+      ]);
+    }
+    if (q.toLowerCase() === 'ls') {
+      lastHits = items;
+      return out(items.map((i, n) => `${String(n + 1).padStart(2)} ${i.group ? i.group + '/' : ''}${i.name}`).join('\n'));
+    }
+    if (/^\d+$/.test(q)) {
+      const hit = lastHits[Number(q) - 1];
+      return hit ? tplShow(hit) : out(t('no such result; search first, e.g. tpl dp', '没有这个序号，先搜索一下，例如 tpl dp'), 't-err');
+    }
+    const words = q.toLowerCase().split(/\s+/);
+    const scored = items.map((i) => {
+      const name = i.name.toLowerCase();
+      const hay = `${name} ${i.group} ${i.keys}`.toLowerCase();
+      let s = 0;
+      if (name === q.toLowerCase()) s = 100;
+      else if (words.every((w) => name.includes(w))) s = 50 - name.length / 100;
+      else if (words.every((w) => hay.includes(w))) s = 10 - name.length / 100;
+      return { i, s };
+    }).filter((x) => x.s > 0).sort((a, b) => b.s - a.s).map((x) => x.i);
+    if (!scored.length) return out(t(`no template matches “${q}”. Try tpl ls`, `没有匹配“${q}”的模板。试试 tpl ls`), 't-err');
+    if (scored.length === 1 || scored[0].name.toLowerCase() === q.toLowerCase()) return tplShow(scored[0]);
+    lastHits = scored.slice(0, 20);
+    return out([
+      lastHits.map((i, n) => `${String(n + 1).padStart(2)} ${i.group ? i.group + '/' : ''}${i.name}`).join('\n'), '\n',
+      span('t-dim', t(`${scored.length} matches · open one with tpl <n>`, `找到 ${scored.length} 个 · 用 tpl <序号> 打开`)),
+    ]);
+  }
+
   function neofetch() {
     const uptime = Math.round((Date.now() - bootTime) / 1000);
     const up = uptime < 60 ? `${uptime}s` : `${Math.floor(uptime / 60)}m ${uptime % 60}s`;
@@ -178,6 +257,7 @@ export function initTerminal({ openPalette } = {}) {
     hIndex = history.length;
     draft = '';
 
+    form.closest('.terminal')?.classList.add('is-used'); // fade the cat once the terminal is in use
     const [name, ...args] = raw.split(/\s+/);
     const cmd = commands[name.toLowerCase()];
     if (name.toLowerCase() !== 'clear') print(echoCmd(raw));
@@ -186,7 +266,14 @@ export function initTerminal({ openPalette } = {}) {
       return;
     }
     const result = cmd.run(args, raw);
-    if (result) print(result);
+    if (result instanceof Promise) {
+      const pending = out(t('loading…', '加载中…'), 't-dim');
+      print(pending);
+      result
+        .then((node) => { if (node) pending.replaceWith(node); else pending.remove(); })
+        .catch(() => pending.replaceWith(out(t('could not load the template index', '模板索引加载失败'), 't-err')))
+        .finally(() => { output.scrollTop = output.scrollHeight; });
+    } else if (result) print(result);
   }
 
   // ---- completion -------------------------------------------------------
@@ -243,5 +330,12 @@ export function initTerminal({ openPalette } = {}) {
   form.hidden = false;
   if (quick) quick.hidden = false;
 
-  return { run, focus: () => { scrollToId('terminal'); setTimeout(() => input.focus({ preventScroll: true }), 350); } };
+  const focus = (prefill) => {
+    scrollToId('terminal');
+    setTimeout(() => {
+      if (typeof prefill === 'string') input.value = prefill;
+      input.focus({ preventScroll: true });
+    }, 350);
+  };
+  return { run, focus };
 }

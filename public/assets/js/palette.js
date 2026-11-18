@@ -38,6 +38,7 @@ export function initPalette({ terminal }) {
     { group: ACT, label: ['Toggle light / dark theme', '切换明暗主题'], icon: 'moon', keys: 'theme dark light mode 主题 深色 浅色', run: () => window.yoziTheme?.toggle() },
     { group: ACT, label: ['Use system theme', '跟随系统主题'], icon: 'sun', keys: 'theme auto system 系统', run: () => window.yoziTheme?.set('system') },
     { group: ACT, label: ['Focus the terminal', '聚焦终端'], icon: 'prompt', hint: 'shell', keys: 'terminal shell command 终端', run: () => terminal?.focus() },
+    { group: ACT, label: ['Search my C++ templates', '查 C++ 模板题'], icon: 'code', hint: 'tpl', keys: 'tpl template learning_log algorithm 模板 算法', run: () => { terminal?.run('tpl'); terminal?.focus('tpl '); } },
     { group: ACT, label: ['Run neofetch', '运行 neofetch'], icon: 'prompt', keys: 'terminal info', run: () => { terminal?.run('neofetch'); terminal?.focus(); } },
     { group: ACT, label: ['Copy link to this site', '复制网站链接'], icon: 'copy', keys: 'share url clipboard 复制 分享', run: copySiteLink },
     { group: ['External', '外部链接'], label: ['Open GitHub profile', '打开 GitHub 主页'], icon: 'github', hint: '↗', keys: 'code repositories', run: () => window.open(GITHUB_URL, '_blank', 'noopener') },

@@ -302,6 +302,7 @@ html.i18n-pending body { visibility: hidden; }
 .term-title { font: 500 15.5px/1 var(--mono); color: var(--text-2); }
 .term-body { position: relative; padding: 18px 26px 16px; }
 .term-cat { position: absolute; top: 14px; right: 24px; width: 132px; color: var(--green); filter: drop-shadow(0 0 6px rgba(62, 224, 143, .55)); pointer-events: none; }
+.terminal.is-used .term-cat { opacity: .12; transition: opacity .6s var(--ease); }
 .cat-eye { animation: catblink 5s infinite; transform-box: fill-box; transform-origin: center; }
 .term-output { height: 238px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; word-break: break-word; }
 .term-output:focus-visible { outline-offset: -2px; }
@@ -319,6 +320,11 @@ html.i18n-pending body { visibility: hidden; }
 .t-grid { display: grid; grid-template-columns: max-content 1fr; gap: 0 1.2em; }
 .t-grid b { color: var(--violet-2); font-weight: 500; }
 .neo { display: flex; gap: 22px; align-items: flex-start; padding: 4px 0 6px; }
+/* tpl: template viewer inside the terminal */
+.t-tpl-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 2px; }
+.t-btn { padding: 0 8px; border-radius: 5px; border: 1px solid var(--green-line); color: var(--green); font: 12.5px/1.7 var(--mono); }
+.t-btn:hover { background: var(--green-soft); }
+.t-code { margin: 6px 0 10px; padding: 10px 12px; max-height: 200px; overflow: auto; border-radius: 6px; border: 1px solid var(--line); background: var(--inset-2); font-size: 12.5px; line-height: 1.6; white-space: pre; tab-size: 4; color: var(--text); scrollbar-width: thin; }
 .term-form { display: flex; align-items: center; gap: 10px; margin-top: 6px; padding-top: 10px; border-top: 1px dashed var(--line); }
 .term-form input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; caret-color: var(--green); font: inherit; }
 .term-form input::placeholder { color: var(--muted); }
@@ -465,6 +471,7 @@ a.card:hover .card-go, .card-head-link:hover .card-go { transform: translateX(4p
 .journey-intro { display: grid; justify-items: start; gap: 10px; padding-right: 40px; border-right: 1px solid var(--line-2); }
 .journey-intro h2 { font: 750 clamp(28px, 2.6vw, 34px)/1.15 var(--sans); letter-spacing: -.03em; }
 .journey-intro p { color: var(--text-2); font-size: 15.5px; margin-bottom: 8px; }
+.journey-btns { display: flex; flex-wrap: wrap; gap: 10px; }
 .journey-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .journey-stats > div { display: flex; flex-direction: column; gap: 4px; }
 .j-ico { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 10px; border-radius: 10px; background: var(--card-solid); border: 1px solid var(--line-2); color: var(--text); box-shadow: var(--card-shadow); }

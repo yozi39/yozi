@@ -27,7 +27,7 @@ WEEKS = 53
 # Only these are listed; stars are refreshed from GitHub on every run.
 CURATED = [
     ("vscode-coding-time-tracker", "Coding Time Tracker", "VS Code extension · TypeScript", "VS Code 扩展 · TypeScript"),
-    ("unity-minesweeper", "Unity Minesweeper", "2D game · Unity / C#", "2D 小游戏 · Unity / C#"),
+    ("learning_log", "Learning Log", "C++ practice log · algorithm templates", "C++ 刷题记录 · 算法模板"),
 ]
 
 
@@ -114,4 +114,11 @@ if __name__ == "__main__":
         main()
     except Exception as exc:  # never fail the deploy because GitHub was unreachable
         print(f"warning: GitHub data not refreshed ({exc}); keeping the committed snapshot", file=sys.stderr)
+    # Also refresh the template index used by the terminal's `tpl` command.
+    try:
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+        import fetch_templates
+        fetch_templates.main()
+    except Exception as exc:
+        print(f"warning: templates not refreshed ({exc}); keeping the existing file", file=sys.stderr)
     sys.exit(0)
