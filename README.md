@@ -23,6 +23,7 @@ public/                      ← Cloudflare Pages 输出目录
     ├── js/main.js           导航高亮、滚动出现、移动菜单、按钮动作
     ├── js/terminal.js       交互式终端
     ├── js/palette.js        命令面板（Ctrl/⌘ + K 或 /）
+    ├── js/clawd.js          底部的像素小伙伴 Clawd
     ├── js/util.js           DOM 小工具、提示条、复制链接
     ├── fonts/               Inter、JetBrains Mono（自托管，OFL 许可证同目录）
     ├── favicon.svg
@@ -75,9 +76,10 @@ curl -I https://yozi.win/does-not-exist    # 404
 
 ## 功能
 
-- **终端**：`help` `whoami` `about` `ls [repos/]` `cat about.txt|goals.txt|links.txt` `repos` `cd <github|repos|cp|links>` `neofetch` `theme [light|dark|system]` `github` `history` `date` `echo` `menu` `clear`。支持 Tab 补全、↑↓ 历史、Ctrl+L 清屏。所有命令都在本地匹配，不执行、不发送任何输入。
+- **终端**：`help` `whoami` `about` `ls [repos/]` `cat about.txt|goals.txt|links.txt` `repos` `cd <github|repos|cp|links>` `neofetch` `theme [light|dark|system]` `github` `history` `date` `echo` `menu` `clawd [on|off]` `clear`。支持 Tab 补全、↑↓ 历史、Ctrl+L 清屏。所有命令都在本地匹配，不执行、不发送任何输入。
 - **命令面板**：Ctrl/⌘ + K 或 `/` 打开，可以跳转区块、打开精选仓库、切换主题、聚焦终端、复制链接。完整支持键盘操作。
 - **查模板 `tpl`**：在终端里搜索 `learning_log/模板题整理/` 里的 C++ 模板，中英文关键词都能搜（`tpl dijkstra`、`tpl 线段树`、`tpl knapsack`）。`tpl ls` 列出全部，`tpl <序号>` 打开搜索结果，可以一键复制，或跳到 GitHub。索引由 `scripts/fetch_templates.py` 生成到 `public/data/templates.json`，只收录这一个文件夹；运行 `fetch_github.py` 时也会顺带刷新。英文别名在脚本里的 `ALIASES`。
+- **Clawd**：屏幕底部会走来走去的像素小伙伴（`assets/js/clawd.js`）。点它会跳起来说话，可以拖起来扔，40 秒没人动它就睡觉。终端 `clawd off` / `clawd` 或命令面板可以收起和召回，选择保存在 `localStorage`。系统开启“减少动态效果”时它只待在原地。纯装饰，对读屏软件隐藏。
 - **Links 卡片**：每个图标都是真实动作，分别是 GitHub、终端、命令面板、切换主题、复制链接、GitHub 活动。
 - **风景卡片和横幅**：纯装饰，通过 `<use>` 复用首屏的山景，不额外增加图片体积，并跟随明暗主题切换。
 - **明暗模式**：默认深色（改 `theme.js` 里的 `DEFAULT` 可换）；访客手动切换后记在 `localStorage`，也可以用终端 `theme system` 改为跟随系统。

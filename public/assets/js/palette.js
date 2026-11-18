@@ -2,7 +2,7 @@
 import { el, scrollToId, copySiteLink, GITHUB_URL } from './util.js?v=2b1d927668';
 import { t, toggleLang } from './i18n.js?v=0e73d8ad65';
 
-export function initPalette({ terminal }) {
+export function initPalette({ terminal, clawd }) {
   const root = document.getElementById('palette');
   const input = document.getElementById('palette-input');
   const list = document.getElementById('palette-list');
@@ -40,9 +40,14 @@ export function initPalette({ terminal }) {
     { group: ACT, label: ['Focus the terminal', '聚焦终端'], icon: 'prompt', hint: 'shell', keys: 'terminal shell command 终端', run: () => terminal?.focus() },
     { group: ACT, label: ['Search my C++ templates', '查 C++ 模板题'], icon: 'code', hint: 'tpl', keys: 'tpl template learning_log algorithm 模板 算法', run: () => { terminal?.run('tpl'); terminal?.focus('tpl '); } },
     { group: ACT, label: ['Run neofetch', '运行 neofetch'], icon: 'prompt', keys: 'terminal info', run: () => { terminal?.run('neofetch'); terminal?.focus(); } },
+    clawd ? {
+      group: ACT, label: clawd.isOn() ? ['Send Clawd home', '让 Clawd 回家'] : ['Call Clawd back', '召唤 Clawd'],
+      icon: 'star', hint: 'clawd', keys: 'clawd pet buddy mascot 宠物 小伙伴',
+      run: () => (clawd.isOn() ? clawd.hide() : clawd.summon()),
+    } : null,
     { group: ACT, label: ['Copy link to this site', '复制网站链接'], icon: 'copy', keys: 'share url clipboard 复制 分享', run: copySiteLink },
     { group: ['External', '外部链接'], label: ['Open GitHub profile', '打开 GitHub 主页'], icon: 'github', hint: '↗', keys: 'code repositories', run: () => window.open(GITHUB_URL, '_blank', 'noopener') },
-  ];
+  ].filter(Boolean);
   let items = buildItems();
 
   let visible = [];

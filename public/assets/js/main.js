@@ -1,8 +1,9 @@
 // Entry point (ES module, deferred by default).
-import { initTerminal } from './terminal.js?v=ef03c31b73';
-import { initPalette } from './palette.js?v=aa04ffcaf7';
+import { initTerminal } from './terminal.js?v=962ccf1d84';
+import { initPalette } from './palette.js?v=fd3af273e5';
 import { reducedMotion, copySiteLink } from './util.js?v=2b1d927668';
 import { initI18n, t } from './i18n.js?v=0e73d8ad65';
+import { initClawd } from './clawd.js?v=72106a9766';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -135,8 +136,9 @@ if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
 
 /* Interactive pieces */
 let palette;
-const terminal = initTerminal({ openPalette: () => palette?.open() });
-palette = initPalette({ terminal });
+const clawd = initClawd();
+const terminal = initTerminal({ openPalette: () => palette?.open(), clawd });
+palette = initPalette({ terminal, clawd });
 
 /* Buttons that trigger actions: data-action="terminal|theme|copy", data-run="<terminal command>" */
 document.addEventListener('click', (e) => {

@@ -9,7 +9,7 @@ const HISTORY_MAX = 50;
 const LINES_MAX = 160;
 const bootTime = Date.now();
 
-export function initTerminal({ openPalette } = {}) {
+export function initTerminal({ openPalette, clawd } = {}) {
   const output = document.getElementById('term-output');
   const form = document.getElementById('term-form');
   const input = document.getElementById('term-input');
@@ -139,6 +139,24 @@ export function initTerminal({ openPalette } = {}) {
       run: () => {
         window.open(GITHUB_URL, '_blank', 'noopener');
         return out([t('opening ', '正在打开 '), link(GITHUB_URL, 'github.com/yozi39'), ' …']);
+      },
+    },
+    clawd: {
+      desc: ['the pixel buddy at the bottom', '底部的像素小伙伴'], usage: '[on|off]',
+      args: ['on', 'off'],
+      run: (args) => {
+        if (!clawd) return out(t('clawd: unavailable', 'clawd：不可用'), 't-err');
+        const want = (args[0] || '').toLowerCase();
+        if (want === 'off' || want === 'hide') {
+          clawd.hide();
+          return out(t('Clawd went home. Type clawd to call it back.', 'Clawd 回家了。输入 clawd 叫它回来。'));
+        }
+        if (want && want !== 'on' && want !== 'show') return out(t('usage: clawd [on|off]', '用法：clawd [on|off]'), 't-err');
+        const wasOn = clawd.isOn();
+        clawd.summon();
+        return out(wasOn
+          ? t('Clawd waves at you ✦', 'Clawd 向你挥挥手 ✦')
+          : t('Clawd is back ✦ click it, drag it, throw it.', 'Clawd 回来了 ✦ 可以点、可以拖、可以扔。'));
       },
     },
     history: { desc: ['previous commands', '历史命令'], run: () => out(history.map((h, i) => `${String(i + 1).padStart(3)}  ${h}`).join('\n') || t('(empty)', '（空）')) },
