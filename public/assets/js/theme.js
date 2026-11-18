@@ -5,12 +5,14 @@
   const media = matchMedia('(prefers-color-scheme: dark)');
   const KEY = 'yozi-theme';
   const COLORS = { dark: '#07090c', light: '#f6f5f9' };
-  let mode = 'system';
+  // Default is dark. A visitor's own choice (light / dark / system) is remembered.
+  const DEFAULT = 'dark';
+  let mode = DEFAULT;
 
   try {
     const saved = localStorage.getItem(KEY);
-    if (saved === 'light' || saved === 'dark') mode = saved;
-  } catch { /* storage may be unavailable; follow the system theme */ }
+    if (saved === 'light' || saved === 'dark' || saved === 'system') mode = saved;
+  } catch { /* storage may be unavailable; use the default */ }
 
   root.classList.add('js');
 
@@ -53,11 +55,8 @@
   }
 
   function set(next) {
-    mode = next === 'light' || next === 'dark' ? next : 'system';
-    try {
-      if (mode === 'system') localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, mode);
-    } catch { /* keep the theme for this page view only */ }
+    mode = next === 'light' || next === 'dark' || next === 'system' ? next : DEFAULT;
+    try { localStorage.setItem(KEY, mode); } catch { /* keep the theme for this page view only */ }
     apply(true);
   }
 
