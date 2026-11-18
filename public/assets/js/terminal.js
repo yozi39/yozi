@@ -71,11 +71,11 @@ export function initTerminal({ openPalette } = {}) {
       args: ['about.txt', 'goals.txt', 'links.txt'],
       run: (args) => {
         const file = (args[0] || '').replace(/^~\//, '');
-        if (file === 'about.txt') {
+        if (file === 'about.txt') { // always English: it's the "file" shown on the intro screen
           return el('div', 't-box', [
-            row('> ', t('Student / Developer / Problem Solver', '学生 / 开发者 / 解题者')),
-            row('> ', t('Interests: ', '兴趣：'), span('t-hl', t('Algorithms, C++, Systems, Web', '算法、C++、系统、Web'))),
-            row('> ', t('Currently: ', '现在：'), span('t-hl', t('Learning, Building, Practicing', '学习、构建、刷题')), span('t-dim', ' ...')),
+            row('> ', 'Student / Developer / Problem Solver'),
+            row('> ', 'Interests: ', span('t-hl', 'Algorithms, C++, Systems, Web')),
+            row('> ', 'Currently: ', span('t-hl', 'Learning, Building, Practicing'), span('t-dim', ' ...')),
           ]);
         }
         if (file === 'goals.txt') {
