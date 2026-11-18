@@ -1,0 +1,10 @@
+{
+  "name": "yozi.win",
+  "short_name": "yozi",
+  "description": "Yozi's personal tech space: algorithms, C++, projects and notes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090c",
+  "theme_color": "#07090c",
+  "icons": [{ "src": "/assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
