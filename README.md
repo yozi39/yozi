@@ -115,6 +115,6 @@ curl -I https://yozi.win/does-not-exist    # 404
 ## 隐私
 
 - 页面只公开昵称 Yozi、`github.com/yozi39`、两个精选仓库和公开的贡献热力图。没有真实姓名、学校、位置、邮箱、IP 或服务器信息，也不显示 GitHub 账号的显示名。
-- 没有第三方请求：字体自托管，没有统计、Cookie、CDN 或嵌入组件。GitHub 数据只在构建时抓取。
+- 第三方请求只有一个：Cloudflare Web Analytics（Cloudflare 在边缘自动注入）。它不用 Cookie、不做指纹、不跨站追踪，只汇总访问量、来源、国家和设备类型。CSP 只为它放行了 `static.cloudflareinsights.com`（脚本）和 `cloudflareinsights.com`（上报）。其余都是自托管：字体、脚本，没有 CDN 或嵌入组件。GitHub 数据只在构建时抓取。
 - 页面上没有虚构内容：没有假的统计数字、文章或参赛经历。
 - 热力图能看出每天的活跃程度。如果不想公开，删掉 `#github` 卡片即可，`fetch_github.py` 找不到标记时只会给出警告。
