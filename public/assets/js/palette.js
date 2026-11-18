@@ -1,6 +1,6 @@
 // Command palette (Ctrl/⌘ + K, or "/"). Accessible combobox + listbox with keyboard navigation.
-import { el, scrollToId, copySiteLink, GITHUB_URL } from './util.js';
-import { t, toggleLang } from './i18n.js';
+import { el, scrollToId, copySiteLink, GITHUB_URL } from './util.js?v=2b1d927668';
+import { t, toggleLang } from './i18n.js?v=0e73d8ad65';
 
 export function initPalette({ terminal }) {
   const root = document.getElementById('palette');

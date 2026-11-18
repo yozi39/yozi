@@ -121,4 +121,10 @@ if __name__ == "__main__":
         fetch_templates.main()
     except Exception as exc:
         print(f"warning: templates not refreshed ({exc}); keeping the existing file", file=sys.stderr)
+    # Finally, re-stamp asset URLs so browsers pick up any changed CSS/JS.
+    try:
+        import stamp_assets
+        stamp_assets.main()
+    except Exception as exc:
+        print(f"warning: assets not stamped ({exc})", file=sys.stderr)
     sys.exit(0)

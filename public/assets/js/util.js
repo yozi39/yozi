@@ -1,4 +1,4 @@
-import { t } from './i18n.js';
+import { t } from './i18n.js?v=0e73d8ad65';
 
 export const GITHUB_URL = 'https://github.com/yozi39';
 

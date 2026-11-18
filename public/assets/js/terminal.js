@@ -1,8 +1,8 @@
 // Browser terminal. Commands are pure text matching: nothing is executed, sent or stored.
 // Commands are always English; their output follows the page language via t('English', '中文').
 // The repo list is read from the "Selected Repos" card so the page stays the single source of truth.
-import { el, scrollToId, GITHUB_URL } from './util.js';
-import { t, lang, setLang } from './i18n.js';
+import { el, scrollToId, GITHUB_URL } from './util.js?v=2b1d927668';
+import { t, lang, setLang } from './i18n.js?v=0e73d8ad65';
 
 const SECTIONS = { home: 'top', top: 'top', github: 'github', repos: 'repos', cp: 'cp', algorithms: 'cp', links: 'links', contact: 'links' };
 const HISTORY_MAX = 50;

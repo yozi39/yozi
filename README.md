@@ -30,6 +30,8 @@ public/                      ← Cloudflare Pages 输出目录
 scripts/
 ├── fetch_github.py          抓取 GitHub 公开数据，写入 index.html
 ├── gen_scenery.py           生成首屏两套山景 SVG（--write 直接写入）
+├── fetch_templates.py       生成终端 tpl 用的模板索引
+├── stamp_assets.py          给 CSS/JS 链接加内容指纹（防缓存）
 ├── serve.py                 本地预览（模拟 Pages 的 _headers 与 404）
 └── og/                      重新生成 social.png
 ```
@@ -102,6 +104,10 @@ curl -I https://yozi.win/does-not-exist    # 404
 - **配色和字体**：都在 `site.css` 顶部的 `:root`（暗色）和 `:root[data-theme="light"]` 中。
 - **山景**：调整 `scripts/gen_scenery.py` 里的峰值参数，然后运行 `python scripts/gen_scenery.py --write`。卡片和横幅会自动跟着变。
 - **分享图**：运行 `python scripts/og/render_og.py`，在浏览器打开 `http://127.0.0.1:8081/`，页面会自动覆盖 `public/assets/social.png`。
+
+## 缓存（改了 CSS / JS 后记得运行一次）
+
+所有 CSS/JS 链接都带内容指纹（`main.js?v=…`），避免浏览器用到旧缓存。改过 CSS 或 JS 后、提交前运行 `python scripts/stamp_assets.py`。设置了构建命令时，部署也会自动运行。
 
 ## 隐私
 
