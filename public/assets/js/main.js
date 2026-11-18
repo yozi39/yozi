@@ -1,9 +1,9 @@
 // Entry point (ES module, deferred by default).
-import { initTerminal } from './terminal.js?v=962ccf1d84';
-import { initPalette } from './palette.js?v=fd3af273e5';
-import { reducedMotion, copySiteLink } from './util.js?v=2b1d927668';
+import { initTerminal } from './terminal.js?v=c7e36b5a40';
+import { initPalette } from './palette.js?v=610f0a978b';
+import { reducedMotion, copySiteLink } from './util.js?v=0e93b6a589';
 import { initI18n, t } from './i18n.js?v=0e73d8ad65';
-import { initClawd } from './clawd.js?v=72106a9766';
+import { initClawd } from './clawd.js?v=1a3c973166';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];

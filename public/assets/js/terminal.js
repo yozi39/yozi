@@ -1,7 +1,7 @@
 // Browser terminal. Commands are pure text matching: nothing is executed, sent or stored.
 // Commands are always English; their output follows the page language via t('English', '中文').
 // The repo list is read from the "Selected Repos" card so the page stays the single source of truth.
-import { el, scrollToId, GITHUB_URL } from './util.js?v=2b1d927668';
+import { el, scrollToId, GITHUB_URL, CODE_URL, reducedMotion } from './util.js?v=0e93b6a589';
 import { t, lang, setLang } from './i18n.js?v=0e73d8ad65';
 
 const SECTIONS = { home: 'top', top: 'top', github: 'github', repos: 'repos', cp: 'cp', algorithms: 'cp', links: 'links', contact: 'links' };
@@ -159,6 +159,7 @@ export function initTerminal({ openPalette, clawd } = {}) {
           : t('Clawd is back ✦ click it, drag it, throw it.', 'Clawd 回来了 ✦ 可以点、可以拖、可以扔。'));
       },
     },
+    code: { desc: ['open Yozi Code, my C++ workbench', '打开 Yozi Code（我的 C++ 刷题工作台）'], run: () => bootCode() },
     history: { desc: ['previous commands', '历史命令'], run: () => out(history.map((h, i) => `${String(i + 1).padStart(3)}  ${h}`).join('\n') || t('(empty)', '（空）')) },
     date: { desc: ['current date', '当前日期'], run: () => out(new Date().toLocaleString(t('en-US', 'zh-CN'))) },
     echo: { desc: ['print text', '输出文字'], usage: '<text>', run: (args, raw) => out(raw.replace(/^echo\s?/i, '')) },
@@ -168,9 +169,11 @@ export function initTerminal({ openPalette, clawd } = {}) {
     sudo: { hidden: true, run: () => out(t('yozi is not in the sudoers file. This incident will not be reported.', 'yozi 不在 sudoers 文件中。此事不会被报告。'), 't-err') },
     exit: { hidden: true, run: () => out(t('There’s no escape from the browser. Try clear.', '浏览器里可逃不出去。试试 clear。')) },
     rm: { hidden: true, run: () => out(t('rm: permission denied (read-only filesystem, nice try)', 'rm: 权限不足（只读文件系统，想得美）'), 't-err') },
-    vim: { hidden: true, run: () => out(t('You’re safe here. No :q! required.', '放心，这里不需要 :q!。')) },
+    vim: { hidden: true, run: () => out([t('You’re safe here. No :q! required. Want a real editor? Type ', '放心，这里不需要 :q!。想用真正的编辑器？输入 '), span('t-hl', 'code'), t('.', '。')]) },
   };
   commands.man = { hidden: true, run: () => commands.help.run() };
+  commands.nano = { hidden: true, run: () => commands.vim.run() };
+  commands.emacs = { hidden: true, run: () => commands.vim.run() };
   commands.ll = { hidden: true, run: (a) => commands.ls.run(a) };
 
   // ---- tpl: template lookup ------------------------------------------------
@@ -245,6 +248,32 @@ export function initTerminal({ openPalette, clawd } = {}) {
       lastHits.map((i, n) => `${String(n + 1).padStart(2)} ${i.group ? i.group + '/' : ''}${i.name}`).join('\n'), '\n',
       span('t-dim', t(`${scored.length} matches · open one with tpl <n>`, `找到 ${scored.length} 个 · 用 tpl <序号> 打开`)),
     ]);
+  }
+
+  // ---- code: "boot" Yozi Code, then open it ----------------------------------
+  // Short on purpose: browsers only allow window.open shortly after the key press.
+  function bootCode() {
+    const box = out([span('t-dim', t('booting yozi-code …', '正在启动 yozi-code …'))]);
+    const steps = [
+      ['editor  ', t('CodeMirror 6 · C++ completion', 'CodeMirror 6 · C++ 补全')],
+      ['compiler', t('GCC 14.2 via Compiler Explorer', 'GCC 14.2（Compiler Explorer）')],
+      ['importer', 'Codeforces · Luogu'],
+    ];
+    const line = (...parts) => { box.append('\n', ...parts); output.scrollTop = output.scrollHeight; };
+    const finish = () => {
+      const w = window.open(CODE_URL, '_blank');
+      if (w) w.opener = null;
+      line(span('t-hl', '→ '), w ? t('opened ', '已打开 ') : t('open ', '打开 '), link(CODE_URL, 'code.yozi.win ↗'),
+        w ? '' : span('t-dim', t('  (pop-up blocked — tap the link)', '  （弹窗被拦截，点上面的链接）')));
+    };
+    if (reducedMotion()) {
+      steps.forEach(([k, v]) => line(span('t-hl', '[ ok ] '), k, '  ', v));
+      finish();
+      return box;
+    }
+    steps.forEach(([k, v], i) => setTimeout(() => line(span('t-hl', '[ ok ] '), k, '  ', v), 120 * (i + 1)));
+    setTimeout(finish, 120 * (steps.length + 1));
+    return box;
   }
 
   function neofetch() {

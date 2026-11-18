@@ -1,6 +1,7 @@
 import { t } from './i18n.js?v=0e73d8ad65';
 
 export const GITHUB_URL = 'https://github.com/yozi39';
+export const CODE_URL = 'https://code.yozi.win';
 
 export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 

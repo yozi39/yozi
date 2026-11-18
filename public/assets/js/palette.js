@@ -1,5 +1,5 @@
 // Command palette (Ctrl/⌘ + K, or "/"). Accessible combobox + listbox with keyboard navigation.
-import { el, scrollToId, copySiteLink, GITHUB_URL } from './util.js?v=2b1d927668';
+import { el, scrollToId, copySiteLink, GITHUB_URL, CODE_URL } from './util.js?v=0e93b6a589';
 import { t, toggleLang } from './i18n.js?v=0e73d8ad65';
 
 export function initPalette({ terminal, clawd }) {
@@ -46,6 +46,7 @@ export function initPalette({ terminal, clawd }) {
       run: () => (clawd.isOn() ? clawd.hide() : clawd.summon()),
     } : null,
     { group: ACT, label: ['Copy link to this site', '复制网站链接'], icon: 'copy', keys: 'share url clipboard 复制 分享', run: copySiteLink },
+    { group: ['External', '外部链接'], label: ['Open Yozi Code (C++ workbench)', '打开 Yozi Code（C++ 刷题工作台）'], icon: 'code', hint: '↗', keys: 'yozi code ide editor compiler cpp c++ run 刷题 编辑器 工作台 运行', run: () => window.open(CODE_URL, '_blank', 'noopener') },
     { group: ['External', '外部链接'], label: ['Open GitHub profile', '打开 GitHub 主页'], icon: 'github', hint: '↗', keys: 'code repositories', run: () => window.open(GITHUB_URL, '_blank', 'noopener') },
   ].filter(Boolean);
   let items = buildItems();
