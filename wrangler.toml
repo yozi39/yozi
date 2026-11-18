@@ -1,0 +1,5 @@
+# Cloudflare Pages configuration (read by the Git integration on every deploy).
+# Serves the static site from public/; no build step is required.
+name = "yozi"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-11-01"
