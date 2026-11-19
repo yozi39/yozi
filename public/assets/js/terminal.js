@@ -1,7 +1,7 @@
 // Browser terminal. Commands are pure text matching: nothing is executed, sent or stored.
 // Commands are always English; their output follows the page language via t('English', '中文').
 // The repo list is read from the "Selected Repos" card so the page stays the single source of truth.
-import { el, scrollToId, GITHUB_URL, CODE_URL, reducedMotion } from './util.js?v=0e93b6a589';
+import { el, scrollToId, GITHUB_URL, CODE_URL, CLIP_URL, reducedMotion } from './util.js?v=9cd0ffa3e7';
 import { t, lang, setLang } from './i18n.js?v=0e73d8ad65';
 
 const SECTIONS = { home: 'top', top: 'top', github: 'github', repos: 'repos', cp: 'cp', algorithms: 'cp', links: 'links', contact: 'links' };
@@ -160,6 +160,7 @@ export function initTerminal({ openPalette, clawd } = {}) {
       },
     },
     code: { desc: ['open Yozi Code, my C++ workbench', '打开 Yozi Code（我的 C++ 刷题工作台）'], run: () => bootCode() },
+    clip: { desc: ['open Yozi Clip: send code between phone and computer', '打开 Yozi Clip（手机和电脑互传代码）'], run: () => openClip() },
     history: { desc: ['previous commands', '历史命令'], run: () => out(history.map((h, i) => `${String(i + 1).padStart(3)}  ${h}`).join('\n') || t('(empty)', '（空）')) },
     date: { desc: ['current date', '当前日期'], run: () => out(new Date().toLocaleString(t('en-US', 'zh-CN'))) },
     echo: { desc: ['print text', '输出文字'], usage: '<text>', run: (args, raw) => out(raw.replace(/^echo\s?/i, '')) },
@@ -248,6 +249,15 @@ export function initTerminal({ openPalette, clawd } = {}) {
       lastHits.map((i, n) => `${String(n + 1).padStart(2)} ${i.group ? i.group + '/' : ''}${i.name}`).join('\n'), '\n',
       span('t-dim', t(`${scored.length} matches · open one with tpl <n>`, `找到 ${scored.length} 个 · 用 tpl <序号> 打开`)),
     ]);
+  }
+
+  // ---- clip: open Yozi Clip right away (pop-ups are only allowed during the key press) ----
+  function openClip() {
+    const w = window.open(CLIP_URL, '_blank');
+    if (w) w.opener = null;
+    return out([span('t-hl', '→ '), w ? t('opened ', '已打开 ') : t('open ', '打开 '), link(CLIP_URL, 'clip.yozi.win ↗'),
+      span('t-dim', w ? t('  scan the QR code with your phone', '  用手机扫页面上的二维码')
+        : t('  (pop-up blocked — tap the link)', '  （弹窗被拦截，点上面的链接）'))]);
   }
 
   // ---- code: "boot" Yozi Code, then open it ----------------------------------

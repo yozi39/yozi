@@ -2,7 +2,7 @@
 // Click it, drag it, throw it; it naps when nobody is around. Purely decorative (aria-hidden).
 // `clawd off` / `clawd on` in the terminal (or the command palette) hides / brings it back; the choice is remembered.
 import { t } from './i18n.js?v=0e73d8ad65';
-import { reducedMotion } from './util.js?v=0e93b6a589';
+import { reducedMotion } from './util.js?v=9cd0ffa3e7';
 
 const KEY = 'yozi-clawd';
 const GREETED = 'yozi-clawd-hi';

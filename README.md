@@ -80,6 +80,7 @@ curl -I https://yozi.win/does-not-exist    # 404
 - **命令面板**：Ctrl/⌘ + K 或 `/` 打开，可以跳转区块、打开精选仓库、切换主题、聚焦终端、复制链接。完整支持键盘操作。
 - **查模板 `tpl`**：在终端里搜索 `learning_log/模板题整理/` 里的 C++ 模板，中英文关键词都能搜（`tpl dijkstra`、`tpl 线段树`、`tpl knapsack`）。`tpl ls` 列出全部，`tpl <序号>` 打开搜索结果，可以一键复制，或跳到 GitHub。索引由 `scripts/fetch_templates.py` 生成到 `public/data/templates.json`，只收录这一个文件夹；运行 `fetch_github.py` 时也会顺带刷新。英文别名在脚本里的 `ALIASES`。
 - **Yozi Code 入口**：我的 C++ 刷题工作台，单独部署在 `https://code.yozi.win`（独立仓库 `yozi-code`）。入口有四处：“算法之路”区块的主按钮“Open Yozi Code”，Links 卡片里的 `</>` 磁贴，命令面板，以及终端命令 `code`。`code` 会先播一段简短的启动动画再打开新标签页；如果浏览器拦截了弹窗，会在终端里留下链接。地址统一定义在 `assets/js/util.js` 的 `CODE_URL`。
+- **Yozi Clip 入口**：手机和电脑免登录互传代码的小工具，单独部署在 `https://clip.yozi.win`（独立私有仓库 `yozi-clip`）。入口有三处：Links 卡片里的剪贴板磁贴，命令面板，以及终端命令 `clip`。`clip` 会直接打开新标签页；如果浏览器拦截了弹窗，会在终端里留下链接。地址定义在 `assets/js/util.js` 的 `CLIP_URL`。
 - **Clawd**：屏幕底部会走来走去的像素小伙伴（`assets/js/clawd.js`）。点它会跳起来说话，可以拖起来扔，40 秒没人动它就睡觉。终端 `clawd off` / `clawd` 或命令面板可以收起和召回，选择保存在 `localStorage`。系统开启“减少动态效果”时它只待在原地。纯装饰，对读屏软件隐藏。
 - **Links 卡片**：每个图标都是真实动作，分别是 GitHub、终端、命令面板、切换主题、复制链接、GitHub 活动。
 - **风景卡片和横幅**：纯装饰，通过 `<use>` 复用首屏的山景，不额外增加图片体积，并跟随明暗主题切换。
